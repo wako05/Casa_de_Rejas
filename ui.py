@@ -1,6 +1,7 @@
 import streamlit as st
 from main import agregar_producto, obtener_inventario, actualizar_stock, registrar_venta, obtener_ventas, editar_stock_y_minimo, obtener_stock_actual, reemplazar_producto
 import pandas as pd
+import io
 
 
 st.set_page_config(page_title="Casa de Rejas", layout="wide")
@@ -44,9 +45,17 @@ with tabs[0]:
         "Alarma": "⚠️" if p.stock < p.stock_minimo else ""
     } for p in productos])
     st.dataframe(df)
-    if st.button("Exportar a Excel (Inventario)", key="export_inventario"):
-        df.to_excel("inventario.xlsx", index=False)
-        st.success("Archivo inventario.xlsx exportado")
+    # Botón para descargar Excel directamente por el navegador
+    excel_buffer = io.BytesIO()
+    df.to_excel(excel_buffer, index=False, engine='openpyxl')
+    excel_buffer.seek(0)
+    st.download_button(
+        label="Descargar Inventario en Excel",
+        data=excel_buffer,
+        file_name="inventario.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        key="download_inventario"
+    )
 
     # Nueva sección: Actualizar Datos
     st.subheader("Actualizar Datos")
@@ -111,9 +120,16 @@ with tabs[1]:
         "Descuento": v["descuento"]
     } for v in ventas])
     st.dataframe(ventas_df)
-    if st.button("Exportar a Excel (Ventas)"):
-        ventas_df.to_excel("ventas.xlsx", index=False)
-        st.success("Archivo ventas.xlsx exportado")
+    ventas_excel_buffer = io.BytesIO()
+    ventas_df.to_excel(ventas_excel_buffer, index=False, engine='openpyxl')
+    ventas_excel_buffer.seek(0)
+    st.download_button(
+        label="Descargar Ventas en Excel",
+        data=ventas_excel_buffer,
+        file_name="ventas.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        key="download_ventas"
+    )
 
 with tabs[2]:
     st.header("Stock actual (stock inicial - vendidos)")
@@ -129,7 +145,14 @@ with tabs[2]:
         for pid, data in stock_actual_dict.items()
     ])
     st.dataframe(stock_actual_df)
-    if st.button("Exportar a Excel (Stock actual)", key="export_button_1"):
-        stock_actual_df.to_excel("stock_actual.xlsx", index=False)
-        st.success("Archivo stock_actual.xlsx exportado")
+    stock_actual_excel_buffer = io.BytesIO()
+    stock_actual_df.to_excel(stock_actual_excel_buffer, index=False, engine='openpyxl')
+    stock_actual_excel_buffer.seek(0)
+    st.download_button(
+        label="Descargar Stock Actual en Excel",
+        data=stock_actual_excel_buffer,
+        file_name="stock_actual.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        key="download_stock_actual"
+    )
 
